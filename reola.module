@@ -1,0 +1,49 @@
+<?php
+
+/**
+ * @file
+ * Primary module hooks for reola module.
+ */
+
+ /**
+ * Implements hook_theme().
+ */
+function reola_theme($existing, $type, $theme, $path) {
+    return array (
+      'block_map' => array (
+          'variables' => array (
+              'datos'=> NULL
+          ),
+          'template' => 'block_map'
+        ),
+
+      'block_ultimodato' => array (
+          'variables' => array (
+            'datos' => NULL
+          ),
+          'template' => 'block_ultimodato'
+      ),
+
+     'filter_form' => array (
+        'variables' => array (
+          'datos' => NULL
+        ),
+        'template' => 'filter_form'
+      ),
+
+    'filter_boyaChica' => array (
+      'variables' => array (
+        'datos' => NULL
+      ),
+      'template' => 'filter_boyaChica'
+      ),
+
+    'filter_boyaGrande' => array (
+      'variables' => array (
+        'datos' => NULL
+      ),
+      'template' => 'filter_boyaGrande'
+    )
+
+    );
+  }

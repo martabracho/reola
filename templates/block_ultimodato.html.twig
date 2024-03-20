@@ -1,0 +1,61 @@
+{% if datos %}
+
+
+<h2 id="titulo"></h2>
+
+<script type="text/javascript">
+    var parametros = new URLSearchParams(window.location.search);
+    var nameBoyaRecibido = parametros.get("param");
+    document.getElementById("titulo").innerHTML = "Últimos datos de la estación " + nameBoyaRecibido;
+</script>
+
+
+<div class="row around-xs">
+    <div class="col-xs-2">
+        <div class="box">
+            <span class="nowrap"><strong class="views-label infoDia">Fecha de Medida</strong></span>
+        </div>
+
+    </div>
+
+<div class="col-xs-2">
+        <div class="box">
+            <span class="infoDia" style="white-space: nowrap;">{{ datos.data|last.tstr }}</span>
+        </div>
+    </div>
+<div class="col-xs-2">
+        <div class="box">
+            <span class="nowrap"><strong class="views-label infoDia" nowrap="nowrap">Altura significativa del oleaje (m)</strong></span>
+        </div>
+    </div>
+    <div class="col-xs-2">
+        <div class="box">
+            <span class="infoDia">{{ datos.data|last.hm0 }}</span>
+        </div>
+    </div>
+</div>
+<div class="row around-xs">
+    <div class="col-xs-2">
+        <div class="box">
+            <span class="nowrap"><strong class="views-label infoDia">Altura Máxima de las olas (m)</strong></span>
+        </div>
+    </div>
+    <div class="col-xs-2">
+        <div class="box">
+            <span class="infoDia">{{ datos.data|last.hmax }}</span>
+        </div>
+    </div>
+    <div class="col-xs-2">
+        <div class="box">
+            <span class="nowrap"><strong class="views-label infoDia" nowrap="nowrap">Altura de las olas de mar de fondo (m)</strong></span>
+        </div>
+    </div>
+    <div class="col-xs-2">
+        <div class="box">
+            <span class="infoDia">{{ datos.data|last.hsw }}</span>
+        </div>
+    </div>
+</div>
+
+
+{% endif %}

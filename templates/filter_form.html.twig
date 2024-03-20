@@ -1,0 +1,108 @@
+
+<h1>Filtrar datos</h1>
+<div class="view-filters">
+
+
+    <!-- Buscar la class que vamos a meter nosotros-->
+	<form name="maps" class="views-exposed-form" method="post" id="maps" accept-charset="UTF-8" data-drupal-form-fields="fechainicio_mapas_filter,fechafin_mapas_filter">
+  		<div class="form--inline clearfix">
+  			<div class="js-form-item form-item js-form-type-select form-type-select js-form-item-provincia-filter form-item-provincia-filter">
+      			<label for="fechainicio_mapas_filter">Fecha Inicio</label>
+        		<input name="fechainicio_mapas_filter" id="fechainicio_mapas_filter" type="text" class="datepicker inputHis">
+        	</div>
+        	<div class="js-form-item form-item js-form-type-select form-type-select js-form-item-provincia-filter form-item-provincia-filter">
+      			<label for="fechafin_mapas_filter">Fecha Fin</label>
+        		<input name="fechafin_mapas_filter" id="fechafin_mapas_filter" type="text" class="datepicker inputHis">
+        	</div>
+
+        	<div data-drupal-selector="edit-actions" class="form-actions js-form-wrapper form-wrapper" id="edit-actions">
+				<input data-drupal-selector="edit-submit-estaciones" type="button" id="edit-submit-estaciones" onclick="irMapa(this);" value="Filtrar" class="button js-form-submit form-submit" />
+			</div>
+
+
+			<div class="js-form-item">
+				<select name="tipoBoya" id="tipoBoya" onchange="manejarEleccion(this)">
+					<option value="" selected disabled>Elige un tipo de dispositvo</option>
+					<option value="boyaChica">Boya de oleaje</option>
+					<option value="boyaGrande">Estación oceanográfica</option>
+				</select>
+			</div>
+		</div>
+
+		<div id="camposFiltroBoyaChica"  style="display: none">
+			{{ include ('filter_boyaChica.html.twig') }}
+		</div>
+
+		<div id="camposFiltroBoyaGrande"  style="display: none">
+			{{ include ('filter_boyaGrande.html.twig') }}
+		</div>
+
+
+
+		<script type="text/javascript">
+
+			function manejarEleccion(selectElement) {
+				var opcionElegida = selectElement.value;
+				var idDivBoyaChica = document.getElementById("camposFiltroBoyaChica");
+				var idDivBoyaGrande = document.getElementById("camposFiltroBoyaGrande");
+
+				//alert('Has elegido: ' + opcionElegida);
+				if (opcionElegida == "boyaChica"){
+					idDivBoyaGrande.style.display = 'none';
+					idDivBoyaChica.style.display = 'block';
+
+				} else if (opcionElegida == "boyaGrande"){
+					idDivBoyaChica.style.display = 'none';
+					idDivBoyaGrande.style.display = 'block';
+				}
+			}
+
+
+		</script>
+
+	</form>
+
+	<script type="text/javascript">
+
+		$(document).ready(function(){
+			$.datepicker.setDefaults( $.datepicker.regional[ "es" ] );
+			$("#fechainicio_mapas_filter").datepicker({ changeMonth: true, changeYear: true, dateFormat: 'dd-mm-yy'})
+				.on('blur', function() {
+					if (!validatedate($(this))){
+						$(this).datepicker("show");
+						$(this).focus();
+					}
+				});
+
+			$("#fechafin_mapas_filter").datepicker({ changeMonth: true, changeYear: true, dateFormat: 'dd-mm-yy' })
+				.on('blur', function() {
+					if (!validatedate($(this))){
+						$(this).datepicker("show");
+						$(this).focus();
+					}
+				});
+
+		});
+
+		function irMapa(button){
+
+			var dateParts = document.getElementById("fechainicio_mapas_filter").value.split("/");
+			var min= dateParts[2] + dateParts[1] + dateParts[0];
+
+			var dateParts = document.getElementById("fechafin_mapas_filter").value.split("/");
+			var max= dateParts[2] + dateParts[1] + dateParts[0];
+
+			if ( document.getElementById("fechainicio_mapas_filter").value.length == 0 || document.getElementById("fechafin_mapas_filter").value.length == 0 ) {
+				alert ("Debe indicar la fecha de inicio y la fecha de fin."); }
+			else if (min>max) { alert ("Error la fecha fin no puede ser menor que la fecha de inicio.");}
+			else {
+				var forms = document.forms['mapas'];
+				alert ("Seleccion: " + document.querySelector('input[name = "valor"]:checked').value);
+			}
+
+
+		}
+
+	</script>
+
+

@@ -1,0 +1,5 @@
+name: 'reola'
+type: module
+description: 'Minisite con los datos del proyecto REOLA'
+package: Custom
+core_version_requirement: ^10

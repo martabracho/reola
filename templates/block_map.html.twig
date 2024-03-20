@@ -1,0 +1,323 @@
+{% if datos %}
+
+<h1> REOLA </h1>
+
+En este mapa se muestra todas las Boyas del proyecto REOLA, para acceder a los datos pulsa en la estación correspondiente. <p /><p />
+<!--También es posible consultar esos datos desde la sección <a href="./estaciones">"Estaciones"</a>.-->
+
+<script src="https://cdn.jsdelivr.net/npm/ol@v8.2.0/dist/ol.js"></script>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/ol@v8.2.0/ol.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+
+
+<style>
+	.map {
+		height: 500px;
+		width: 100%;
+		border: 1px solid grey;
+		position: relative;
+		background: #cad2d3;
+	}
+
+	.ol-popup {
+		position: absolute;
+		background-color: rgba(255,255,255,0.8);
+		-webkit-filter: drop-shadow(0 1px 4px rgba(0,0,0,0.2));
+		filter: drop-shadow(0 1px 4px rgba(0,0,0,0.2));
+		padding: 15px;
+		border-radius: 10px;
+		border: 1px solid #cccccc;
+		bottom: 12px;
+		left: -50px;
+		min-width: 280px;
+
+		align-items: center;
+		justify-content: center;
+		display: flex;
+	}
+
+	.ol-popup-content{
+		background: #F8F8F8;
+		box-shadow: 0px 0px 5px 0px rgba(0,0,0,0.3);
+		border-radius: 3px;
+		font-family: 'PT Sans', sans-serif;
+		text-align: center;
+		width: 600px;
+	}
+
+	.ol-popup:after, .ol-popup:before {
+		top: 100%;
+		border: solid transparent;
+		content: " ";
+		height: 0;
+		width: 0;
+		position: absolute;
+		pointer-events: none;
+	}
+
+	.ol-popup:after {
+		border-width: 10px;
+		left: 48px;
+		margin-left: -10px;
+	}
+
+	.ol-popup:before {
+		border-top-color: #cccccc;
+		border-width: 11px;
+		left: 48px;
+		margin-left: -11px;
+	}
+
+	.ol-popup-closer {
+		text-decoration: none;
+		position: absolute;
+		top: 2px;
+		right: 8px;
+		color: black;
+	}
+
+	.ol-popup-closer:after {
+		content: "x";
+	}
+
+	.ol-popup-closer:hover{
+		color: rgba(0,0,0, .5);
+	}
+
+	.ol-popup .btn-submit-popup {
+		padding: 0 20px;
+		min-height: 40px;
+		line-height: 30px;
+		border: none;
+		color: #fff;
+		background: #5E7DE3;
+		border-radius: 3px;
+		font-family: 'PT Sans', sans-serif;
+		font-size: 16px;
+		cursor: pointer;
+	}
+
+	.ol-popup .btn-submit-popup:hover {
+		background: rgba(94,125,227, .9);
+	}
+
+</style>
+
+<div id="map" class="map">
+
+</div>
+
+<div id="popup" class="ol-popup">
+	<a href="#" id="popup-closer" class="ol-popup-closer"></a>
+	<div id="popup-content" class="popup-content"></div>
+</div>
+
+<script type="text/javascript">
+
+	/**
+	 * Elements that make up the popup.
+	 */
+	var container = document.getElementById('popup');
+	var content = document.getElementById('popup-content');
+	var closer = document.getElementById('popup-closer');
+
+
+
+	/**
+	 * Create an overlay to anchor the popup to the map.
+	 */
+	var overlay = new ol.Overlay({
+	  element: container,
+	  autoPan: true,
+	  autoPanAnimation: {
+	    duration: 250
+	  }
+	});
+
+
+	/**
+	 * Add a click handler to hide the popup.
+	 * @return {boolean} Don't follow the href.
+	 */
+	closer.onclick = function() {
+		overlay.setPosition(undefined);
+		closer.blur();
+
+	  return false;
+	};
+
+	//Definimos el bbox del mapa
+  	var extent = [{{ datos.extent[0] }}, {{ datos.extent[1] }}, {{ datos.extent[2] }}, {{ datos.extent[3] }}];
+
+	//Definimos la vector layer donde volcamos los datos solicitados
+	var vectorSource = new ol.source.Vector({});
+
+	var features = new ol.format.GeoJSON().readFeatures('{{  datos.geoJSON|raw  }}',
+						{
+	                       dataProjection:'EPSG:4326',
+	                       featureProjection:'EPSG:3857'
+	                    }
+						);
+
+	vectorSource.addFeatures(features);
+
+	var icono = document.createElement("i");
+	icono.className = "fa-solid fa-anchor-circle-check";
+
+	var vector = new ol.layer.Vector({
+  	  title: '{{ datos.layers.title }}',
+	  source:vectorSource,
+	  blur: 10,
+	  radius: 10,
+	  style: function(feature) {
+		if (feature.getProperties().boyaGrande==0){
+			//console.log("Boyas Chicas: " + feature.getProperties().name);
+			if (feature.getProperties().online == 0){
+					return new ol.style.Style({
+						image: new ol.style.Circle({
+							radius: 7,
+							fill: new ol.style.Fill({color: '#ff0000'}),
+							stroke: new ol.style.Stroke({
+							color: [255,187,96], width: 2
+							})
+						})
+					});
+
+				} else {
+					return new ol.style.Style({
+						image: new ol.style.Circle({
+							radius: 7,
+							fill: new ol.style.Fill({color: '#60f4ff'}),
+							stroke: new ol.style.Stroke({
+							color: [255,187,96], width: 2
+							})
+						})
+					});
+				}
+		} else {
+			//console.log("Boyas Grandes: " + feature.getProperties().name);
+			if (feature.getProperties().online == 0){
+					return new ol.style.Style({
+						image: new ol.style.Circle({
+							radius: 7,
+							fill: new ol.style.Fill({color: '#4C3131'}),
+							stroke: new ol.style.Stroke({
+							color: [255,187,96], width: 2
+							})
+						})
+					});
+
+				} else {
+					return new ol.style.Style({
+						image: new ol.style.Circle({
+							radius: 7,
+							fill: new ol.style.Fill({color: '#A0FF73'}),
+							stroke: new ol.style.Stroke({
+							color: [255,187,96], width: 2
+							})
+						})
+					});
+				}
+
+
+					/*return new ol.style.Style({
+						image: new ol.style.Icon({
+						img: 'icono', // Nombre del icono deseado
+						color: 'blue', // Color del ícono
+						scale: 1.2 // Escala opcional para ajustar el tamaño
+					})
+					});*/
+		}
+	  }
+	});
+
+  	//Creamos el objeto ImageWMS correspondiente
+  	var layer = null;
+  	var layers = new Array();
+
+	layer = new ol.layer.Image({
+  				title: '{{datos.layers.title}}',
+	    		extent: extent,
+	    		source: new ol.source.ImageWMS({
+					url: '{{ datos.layers.url }}',
+	      			params: {'LAYERS': '{{ datos.layers.params.LAYERS }}'},
+	      			serverType: 'geoserver'
+	    		})
+	  		});
+
+  	layers.push(layer);
+
+
+
+  	//Añadimos la capa vectorial con el json generado para nuestra variable
+  	layers.push(vector);
+
+	//console.log(layers);
+
+
+	//Definimos el mapa de OpenLayers
+  	var map = new ol.Map({
+    	target: 'map',
+    	layers: layers,
+		overlays: [overlay],
+
+    	view: new ol.View({
+    		//projection: projection,
+      		center: [{{ datos.center[0] }}, {{ datos.center[1] }}],
+			zoom: 7
+    	})
+
+  	});
+
+	var view = map.getView();
+	view.setMinZoom(6);
+
+  	// Definimos el control Select para poder controlar el click sobre el mapa
+	var selectClick = new ol.interaction.Select({
+  		condition: ol.events.condition.click
+	});
+
+	map.addInteraction(selectClick);
+
+	var idBoya = null;
+
+
+
+	//Animación del popup
+
+	overlay.on('change:position', function() {
+		content.style.transform = 'scale(0.5)';
+		content.style.transition = 'all 1.5s ease';
+		setTimeout(function() {
+			content.style.transform = 'scale(1)';
+		}, 500);
+	});
+
+
+	selectClick.on('select',function(e) {
+		if(e.selected && e.selected.length > 0){
+			var coordinate = e.selected[0].getGeometry().flatCoordinates;
+			idBoya = e.selected[0].id_;
+			name = e.selected[0].getProperties().name;
+			content.innerHTML = "<button id='bttFicha' class='btn-submit-popup'>" + e.selected[0].getProperties().name + "</button>";
+			document.getElementById("bttFicha").addEventListener("click", function(){
+
+				console.log(idBoya);
+				var newUrl = content.baseURI + '/' + idBoya + '?param=' + name;
+				window.location.href = newUrl;
+
+			});
+			overlay.setPosition(coordinate);
+		} else {
+			console.log('No hay elementos seleccionados');
+		}
+	});
+
+
+
+
+</script>
+
+
+{% endif %}

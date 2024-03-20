@@ -1,0 +1,21 @@
+extent:
+  xmin: -1792243.8021409153
+  ymin: 3879386.7850918537
+  xmax: 4472817.167754004
+  ymax: 18990863.47851347
+center:
+  x: -508883.42684124695
+  y: 4492019.701421972
+layers:
+  layer1: "ign-ortofoto"
+  title: "IGN"
+  nombre: "ign"
+  url: "https://www.ign.es/wms-inspire/pnoa-ma"
+  params: { 'LAYERS': 'fondo' }
+stations:
+  - station:
+      id: "2"
+      name: "Estación de Huelva"
+  - station:
+      id: "3"
+      name: "Estación de Almería"

@@ -1,0 +1,8 @@
+url: 'https://obscape.com/portal/api/v3/api'
+proxy:
+    http: 'http://user:password@internet.agenciaagrariaypesquera.es:3128'
+    https: 'http://user:password@internet.agenciaagrariaypesquera.es:3128'
+query:
+    username: username
+    key: key
+    project: project

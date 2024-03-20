@@ -1,0 +1,3 @@
+services:
+  reola.service:
+    class: Drupal\reola\Services\ReolaService
