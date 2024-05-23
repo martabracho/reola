@@ -3,7 +3,7 @@
 <h1> REOLA </h1>
 
 En este mapa se muestra todas las Boyas del proyecto REOLA, para acceder a los datos pulsa en la estación correspondiente. <p /><p />
-<!--También es posible consultar esos datos desde la sección <a href="./estaciones">"Estaciones"</a>.-->
+
 
 <script src="https://cdn.jsdelivr.net/npm/ol@v8.2.0/dist/ol.js"></script>
 
@@ -101,11 +101,52 @@ En este mapa se muestra todas las Boyas del proyecto REOLA, para acceder a los d
 	.ol-popup .btn-submit-popup:hover {
 		background: rgba(94,125,227, .9);
 	}
+	div#legend{
+		background-color: rgba(255, 255, 255, 0.8);
+		border-radius: 8px;
+		box-shadow: 0 5px 5px rgba(0, 0, 0, 0.1);
+		font: 12px/20px 'Helvetica Neue', Arial, Helvetica, sans-serif;
+		padding: 10px;
+		position: absolute;
+		border: 10px rgba(255,255,255,1);
+		right: 20px;
+		bottom: 20px;
+		z-index: 1;
+	}
+
+	div#legend ul li {
+		list-style: none;
+	}
+
+	div#legend ul li#boyaChicaOn {
+		list-style-image: url("{{ path('<front>') }}{{directory}}/images/boyaChicaOn.png");
+	}
+
+	div#legend ul li#boyaGrandeOn {
+		list-style-image: url("{{ path('<front>') }}{{directory}}/images/boyaGrandeOn.png");
+	}
+
+	div#legend ul li#boyaChicaOff {
+		list-style-image: url("{{ path('<front>') }}{{directory}}/images/boyaChicaOff.png");
+	}
+
+	div#legend ul li#boyaGrandeOff {
+		list-style-image: url("{{ path('<front>') }}{{directory}}/images/boyaGrandeOff.png");
+	}
 
 </style>
 
 <div id="map" class="map">
-
+	<div id="legend">
+	  <div id="legend-content">
+		<ul>
+			<li id="boyaChicaOn">Boya de oleaje online</li>
+			<li id="boyaGrandeOn">Estación oceanográfica online</li>
+			<li id="boyaChicaOff">Boya de oleaje offline</li>
+			<li id="boyaGrandeOff">Estación oceanográfica offline</li>
+		</ul>
+	  </div>
+	</div>
 </div>
 
 <div id="popup" class="ol-popup">
@@ -172,7 +213,7 @@ En este mapa se muestra todas las Boyas del proyecto REOLA, para acceder a los d
 	  radius: 10,
 	  style: function(feature) {
 		if (feature.getProperties().boyaGrande==0){
-			//console.log("Boyas Chicas: " + feature.getProperties().name);
+
 			if (feature.getProperties().online == 0){
 					return new ol.style.Style({
 						image: new ol.style.Circle({
@@ -196,7 +237,7 @@ En este mapa se muestra todas las Boyas del proyecto REOLA, para acceder a los d
 					});
 				}
 		} else {
-			//console.log("Boyas Grandes: " + feature.getProperties().name);
+
 			if (feature.getProperties().online == 0){
 					return new ol.style.Style({
 						image: new ol.style.Circle({
@@ -220,14 +261,6 @@ En este mapa se muestra todas las Boyas del proyecto REOLA, para acceder a los d
 					});
 				}
 
-
-					/*return new ol.style.Style({
-						image: new ol.style.Icon({
-						img: 'icono', // Nombre del icono deseado
-						color: 'blue', // Color del ícono
-						scale: 1.2 // Escala opcional para ajustar el tamaño
-					})
-					});*/
 		}
 	  }
 	});
@@ -304,7 +337,8 @@ En este mapa se muestra todas las Boyas del proyecto REOLA, para acceder a los d
 			document.getElementById("bttFicha").addEventListener("click", function(){
 
 				console.log(idBoya);
-				var newUrl = content.baseURI + '/' + idBoya + '?param=' + name;
+				//var newUrl = content.baseURI + '/' + idBoya + '/' + name + '?param=' + name;
+				var newUrl = content.baseURI + '/' + idBoya + '/' + name;
 				window.location.href = newUrl;
 
 			});

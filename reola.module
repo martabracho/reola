@@ -5,6 +5,9 @@
  * Primary module hooks for reola module.
  */
 
+use Drupal\Core\Form\FormState;
+use Drupal\Core\Form\FormStateInterface;
+
  /**
  * Implements hook_theme().
  */
@@ -17,33 +20,24 @@ function reola_theme($existing, $type, $theme, $path) {
           'template' => 'block_map'
         ),
 
-      'block_ultimodato' => array (
+     'block_ultimodato' => array (
           'variables' => array (
             'datos' => NULL
           ),
           'template' => 'block_ultimodato'
       ),
 
-     'filter_form' => array (
-        'variables' => array (
-          'datos' => NULL
-        ),
-        'template' => 'filter_form'
+      'block_lastdatabig' => array(
+          'variables' => array (
+              'datos' =>NULL
+          ),
+          'template' => 'block_lastdatabig'
       ),
 
-    'filter_boyaChica' => array (
-      'variables' => array (
-        'datos' => NULL
-      ),
-      'template' => 'filter_boyaChica'
-      ),
-
-    'filter_boyaGrande' => array (
-      'variables' => array (
-        'datos' => NULL
-      ),
-      'template' => 'filter_boyaGrande'
-    )
 
     );
   }
+
+?>
+
+

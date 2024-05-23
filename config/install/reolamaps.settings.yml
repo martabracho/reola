@@ -19,3 +19,9 @@ stations:
   - station:
       id: "3"
       name: "Estación de Almería"
+  - station:
+      id: "4"
+      name: "Estación de Cádiz"
+  - station:
+      id: "5"
+      name: "Estación de Granada"

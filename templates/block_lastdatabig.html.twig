@@ -6,18 +6,21 @@
 <script src="//ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js"></script>
 
 <script type="text/javascript">
+
     var url = window.location.href;
+
     var posicion = url.lastIndexOf("/");
     var nameBoyaRecibido = url.slice(posicion+1);
+
     nameBoyaRecibido = nameBoyaRecibido.replace("%C3%A1","á");
-    nameBoyaRecibido = nameBoyaRecibido.replace("%C3%A9","é");
     nameBoyaRecibido = nameBoyaRecibido.replace("%C3%AD","í");
+    nameBoyaRecibido = nameBoyaRecibido.replace("%C3%B3","ó");
     nameBoyaRecibido = nameBoyaRecibido.replace("%C3%B1","ñ");
+
     for (var i = 0; i < nameBoyaRecibido.length; i++){
       nameBoyaRecibido = nameBoyaRecibido.replace("%20"," ");
     }
-    document.getElementById("titulo").innerHTML = "Últimos datos de " + nameBoyaRecibido;
-
+    document.getElementById("titulo").innerHTML = "Últimos datos de la " + nameBoyaRecibido;
 </script>
 
 <style>
@@ -38,6 +41,7 @@
         text-align: right;
         padding: 10px;
     }
+
     .datosizq{
       width: 50%;
       float: left;
@@ -70,7 +74,6 @@
 
 </style>
 
-{% if datos.data|last.tstr!="" %}
 <div class="datosizq">
   <table id="concabecera">
     <tbody>
@@ -78,13 +81,13 @@
         <td>
           <p>
             <b>Fecha de Medida: </b>
-            {{ datos.data|last.tstr }}
+            {{ datos.reception_date_time }}
             <br>
             <b>Latitud(º): </b>
-            {{ datos.data|last.lat }}
+            {{ datos.latitude }}
             <br>
             <b>Longitud(º): </b>
-            {{ datos.data|last.lon }}
+            {{ datos.longitude }}
           </p>
         </td>
       </tr>
@@ -95,48 +98,25 @@
 <div class="tab">
   <button class="tablinks" onclick="openDatos(event, 'datosdiarios')" id="defaultOpen">Último Dato Registrado</button>
   <button class="tablinks" onclick="openDatos(event, 'datosacumulados')">Descarga de Ficheros</button>
- </div>
+
+</div>
 
 <div id="datosdiarios" class="tabcontent scroll-table">
 <table class="scroll-table">
   <thead>
     <tr>
-      <th>Temperatura de la superficie del mar(ºC)</th>
-      <th>Altura significativa del oleaje(metros)</th>
-      <th>Altura máxima de las olas(metros)</th>
-      <th>Altura de las olas del mar de fondo(metros)</th>
-      <th>Periodo de pico de la ola(segundos)</th>
-      <th>Periodo de las olas de mar de fondo(segundos)</th>
-      <th>Periodo medio de las olas Tm01(segundos)</th>
-      <th>Periodo medio de las olas Tm02(segundos)</th>
-      <th>Periodo medio de las olas Tm10(segundos)</th>
-      <th>Periodo promedio de las olas(segundos)</th>
-      <th>Periodo máximo de las olas(segundos)</th>
-      <th>Dirección del pico de la ola(ºN)</th>
-      <th>Dirección media de las olas(ºN)</th>
-      <th>Dirección de las olas de mar de fondo(ºN)</th>
-      <th>Dispersión direccional máxima(gradosº)</th>
-      <th>Dispersión direccional media(gradosº)</th>
+      {% for clave, valor in datos.data%}
+        <th>{{ valor.variable.name }}</th>
+      {% endfor %}
+
     </tr>
   </thead>
   <tbody>
     <tr>
-      <td>{{ datos.data|last.sst }}</td>
-      <td>{{ datos.data|last.hm0 }}</td>
-      <td>{{ datos.data|last.hmax }}</td>
-      <td>{{ datos.data|last.hsw }}</td>
-      <td>{{ datos.data|last.tp }}</td>
-      <td>{{ datos.data|last.tsw }}</td>
-      <td>{{ datos.data|last.tm01 }}</td>
-      <td>{{ datos.data|last.tm02 }}</td>
-      <td>{{ datos.data|last.tm10 }}</td>
-      <td>{{ datos.data|last.tavg }}</td>
-      <td>{{ datos.data|last.tmax }}</td>
-      <td>{{ datos.data|last.dirp }}</td>
-      <td>{{ datos.data|last.dirm }}</td>
-      <td>{{ datos.data|last.dirsw }}</td>
-      <td>{{ datos.data|last.sigp }}</td>
-      <td>{{ datos.data|last.sigm }}</td>
+      {% for clave, valor in datos.data%}
+        <td>{{ valor.value }}</td>
+      {% endfor %}
+
     </tr>
 
   </tbody>
@@ -146,19 +126,18 @@
 <div id="datosacumulados" class = "tabcontent"></div>
 
 <script type="text/javascript">
-
-     window.addEventListener('load', function() {
-    // Ejecución después de que el DOM de la página se haya cargado completamente
-      document.getElementById("block-child-webform").style.display = "none";
-       //Rellenar el campo IdBoya con el dato de la url
-      var url = window.location.href;
-      var testigo = "reola";
-      var indexOfTestigo = url.indexOf(testigo)+5;
-      var urlResto = url.slice (indexOfTestigo+1);
-      var idBoya = urlResto.slice(0 , urlResto.indexOf("/"));
-      document.getElementById("edit-idboya").value = idBoya;
-
+    window.addEventListener('load', function() {
+        // Ejecución después de que el DOM de la página se haya cargado completamente
+        document.getElementById("block-child-webform").style.display = "none";
+        //Rellenar el campo IdBoya con el dato de la url
+        var url = window.location.href;
+        var testigo = "reola";
+        var indexOfTestigo = url.indexOf(testigo)+5;
+        var urlResto = url.slice (indexOfTestigo+1);
+        var idBoya = urlResto.slice(0 , urlResto.indexOf("/"));
+        document.getElementById("edit-idboya").value = idBoya;
     });
+
 		function openDatos(evt, datosName) {
 			  var i, tabcontent, tablinks;
 			  tabcontent = document.getElementsByClassName("tabcontent");
@@ -169,13 +148,15 @@
 			  for (i = 0; i < tablinks.length; i++) {
 				  tablinks[i].className = tablinks[i].className.replace(" active", "");
 			  }
-			  document.getElementById(datosName).style.display = "block";
+
+        document.getElementById(datosName).style.display = "block";
         evt.currentTarget.className += " active";
 
         if (datosName=='datosdiarios'){
           $("#block-child-webform").hide();
           $("#webform-submission-export-data-add-form").hide();
           $("#datosdiarios").show();
+
         }
 
         if (datosName=='datosacumulados'){
@@ -183,35 +164,10 @@
           $("#webform-submission-export-data-add-form").show();
           $("#datosdiarios").hide();
         }
-
-			}
+		}
 
 		document.getElementById("defaultOpen").click();
 
-
-
-</script>
-
-
-
-{% endif %}
-
-{% if datos.data|last.tstr=="" %}
-
-    <script type="text/javascript">
-        window.addEventListener('load', function() {
-          // Ejecución después de que el DOM de la página se haya cargado completamente
-          document.getElementById("block-child-webform").style.display = "none";
-        });
-
-        $("#block-child-webform").hide();
-        $("#webform-submission-export-data-add-form").hide();
-        $("#datosdiarios").hide();
-
-    </script>
-    <b>La boya está desconectada</b>
-
-{% endif %}
-
+		</script>
 
 {% endif %}

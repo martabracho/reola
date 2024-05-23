@@ -9,6 +9,17 @@ use GuzzleHttp\Client;
 use GuzzleHttp\RequestOptions;
 use Psr\Http\Message\RequestInterface;
 
+use Drupal\webform\Entity\Webform;
+use Drupal\webform\Entity\WebformSubmission;
+
+use Drupal\Core\Datetime\DrupalDateTime;
+use Drupal\dblog\Plugin\views\wizard\Watchdog;
+use GuzzleHttp\Exception\RequestException;
+use GuzzleHttp\Psr7\Request;
+
+use Drupal\Core\Utility\Error;
+
+
 class ReolaService{
 
     private $stringResponse;
@@ -20,7 +31,7 @@ class ReolaService{
 
 
    /**
-    * Funcion que recopila los datos de las boyas para mostrar en el mapa
+    * Funcion que recopila los datos de las boyas para mostrar en el mapa inicial
     *
     * @return $datos
     */
@@ -34,29 +45,31 @@ class ReolaService{
         $res =[];
         $res = $this->getBoyasChicas();
         $res2 = $this->getBoyasGrandes();
-        $res2 = $this->addName($res2, $config);
 
+        $geoJSON = '{"type":"FeatureCollection","features":[';
+           if ($res !== null){
+              foreach ($res['boyaChicaItem'] as $feature)
+              {
 
-       $geoJSON = '{"type":"FeatureCollection","features":[';
-        foreach ($res as $feature)
-        {
+                  $geoJSON = $geoJSON . '{"type":"Feature","id":"' . $feature['id'] .
+                    '","properties":{"name":"' . $feature['name'] . '","online":"' .$feature['devices']['wavebuoy']['online'] .
+                      '","boyaGrande":"0"},"geometry":{"type":"Point","coordinates":[' . $feature['longitude'] . ',' . $feature['latitude'] . ']}},';
+              }
+           }
+           if ($res2 !== null){
+              $res2 = $this->addName($res2, $config);
+              foreach ($res2 as $feature)
+              {
+                $online = $this->validateOnline($feature['reception_date_time']);
+                $geoJSON = $geoJSON . '{"type":"Feature","id":"' . $feature['id'] .
+                  '","properties":{"name":"' . $feature['name'] . '","online":"' . $online . '","boyaGrande":"1"},"geometry":{"type":"Point","coordinates":[' . $feature['longitude'] . ',' . $feature['latitude'] . ']}},';
 
-            $geoJSON = $geoJSON . '{"type":"Feature","id":"' . $feature['id'] .
-              '","properties":{"name":"' . $feature['name'] . '","online":"' .$feature['devices']['wavebuoy']['online'] .
-                '","boyaGrande":"0"},"geometry":{"type":"Point","coordinates":[' . $feature['longitude'] . ',' . $feature['latitude'] . ']}},';
-        }
-
-        foreach ($res2 as $feature)
-        {
-          $geoJSON = $geoJSON . '{"type":"Feature","id":"' . $feature['id'] .
-            '","properties":{"name":"' . $feature['name'] . '","online":"1","boyaGrande":"1"},"geometry":{"type":"Point","coordinates":[' . $feature['longitude'] . ',' . $feature['latitude'] . ']}},';
-        }
-
+              }
+          }
         $geoJSON = rtrim($geoJSON, ',');
         $geoJSON = $geoJSON . ']}';
 
         $datos["geoJSON"] = $geoJSON;
-
         return $datos;
     }
 
@@ -76,7 +89,8 @@ class ReolaService{
         foreach ($data as $station){
           if ($item["id"]==$station[0]["station"]["id"]) $item["name"] = $station[0]["station"]["name"];
           if ($item["id"]==$station[1]["station"]["id"]) $item["name"] = $station[1]["station"]["name"];
-
+          if ($item["id"]==$station[2]["station"]["id"]) $item["name"] = $station[2]["station"]["name"];
+          if ($item["id"]==$station[3]["station"]["id"]) $item["name"] = $station[3]["station"]["name"];
         }
 
       }
@@ -91,25 +105,30 @@ class ReolaService{
     */
     private function getBoyasGrandes(){
 
-        $cadena = "Hola Drupal";
+        $cadena = "";
 
-        $config = \Drupal::config('reolaboyasgrandes.settings');
+        $config = \Drupal::config('reolaurls.settings');
 
         $data = ['string_con' => $config->get()];
 
-
-        $url = $data["string_con"]["url"];
+        $url = $data["string_con"]["urlBoyasGrandes"];
 
         $client = new Client([
             // Base URI is used with relative requests
-            'base_uri' => $data["string_con"]["url"],
+            'base_uri' => $data["string_con"]["urlBoyasGrandes"],
             'timeout'  => 20.0,
             'verify' => false,
         ]);
 
-        $response = $client->request('GET', $url);
+        $logger = \Drupal::logger('reola');
+        try {
+          $response = $client->request('GET', $url);
+          $cadena = $this->dataParser($response);
+        } catch (RequestException $e) {
+          Error::logException($logger, $e);
+        }
 
-        $cadena = $this->dataParser($response);
+
         return $cadena;
 
     }
@@ -122,41 +141,30 @@ class ReolaService{
      */
     private function getBoyasChicas(){
 
-        $config = \Drupal::config('reolaboyaschicas.settings');
+      $cadena = "";
+      $config = \Drupal::config('reolaurls.settings');
+      $data = ['string_con' => $config->get()];
 
-        $data = ['string_con' => $config->get()];
-
-
+      $url = $data["string_con"]["urlBoyasChicas"];
         //Obtener los datos de primer nivel
-
-        $client = new Client([
+      $client = new Client([
             // Base URI is used with relative requests
-            'base_uri' => $data["string_con"]["url"],
-            'timeout'  => 20.0,
-            'verify' => false,
+          'base_uri' => $data["string_con"]["urlBoyasChicas"],
+          'timeout'  => 20.0,
+          'verify' => false,
         ]);
 
-
-        $strResponse = [
-            'proxy' => [
-                'http'  => $data["string_con"]["proxy"]["http"],
-                'https' => $data["string_con"]["proxy"]["https"],
-            ],
-            'query' => [
-                'username' => $data["string_con"]["query"]["username"],
-                'key' => $data["string_con"]["query"]["key"],
-                'project' => $data["string_con"]["query"]["project"],
-            ]
-            ];
-
-        // Request with proxy and queries
-        $response = $client->request('GET', '', $strResponse);
-
+      $logger = \Drupal::logger('reola');
+      try {
+        $response = $client->request('GET',$url);
         //Parsear los datos de primer nivel obtenidos
         $cadena = $this->dataParser($response);
 
-        return $cadena;
+      } catch (RequestException $e){
+        Error::logException($logger, $e);
+      }
 
+      return $cadena;
     }
 
 
@@ -168,37 +176,64 @@ class ReolaService{
      */
     public function getUltimoDato($idBoya){
         $cadena = "";
-        $config = \Drupal::config('reolaultimodato.settings');
+        $config = \Drupal::config('reolaurls.settings');
 
         $data = ['string_con' => $config->get()];
 
-        //TODO esto no me gusta un pelo
         if ((int)$idBoya>10){ //es una boya chica
+
           $client = new Client([
             // Base URI is used with relative requests
-            'base_uri' => $data["string_con"]["url"],
+            'base_uri' => $data["string_con"]["urlLastBoyasChicas"],
             'timeout'  => 20.0,
             'verify' => false,
           ]);
-          $response = $client->request('GET', (string)$idBoya);
+
+          $logger = \Drupal::logger('reola');
+          try {
+            $response = $client->request('GET', (string)$idBoya);
+          } catch (RequestException $e){
+            Error::logException($logger, $e);
+          }
+
 
         } else { //es una boya grande
           $client = new Client([
             // Base URI is used with relative requests
-            'base_uri' => $data["string_con"]["urlGrandes"],
+            'base_uri' => $data["string_con"]["urlLastBoyasGrandes"],
             'timeout'  => 20.0,
             'verify' => false,
           ]);
 
-          $response = $client->request('GET', (string)$idBoya . '/tracks');
+          $logger = \Drupal::logger('reola');
+          try{
+            $response = $client->request('GET', (string)$idBoya . '/ultimoTrack');
+          } catch (RequestException $e){
+            Error::logException($logger, $e);
+          }
 
         }
 
         $cadena = $this->dataParser($response);
-
+        if ((int)$idBoya<10){
+          $cadena = $this->dateFormat($cadena);
+        }
         return $cadena;
-
     }
+
+    public function dateFormat ($cadena){
+        $dateTime = $cadena['reception_date_time'];
+        $separadorDate = strpos($dateTime, 'T');
+        $date = substr($dateTime, 0, $separadorDate);
+        $separadorHour = strpos($dateTime,'.')-$separadorDate-1;
+        $hour = substr($dateTime, $separadorDate+1, $separadorHour);
+        //$hour = (int)$hour+2; [UTC+2]
+        $dateFormat = $date . ' ' . $hour . ' [UTC]';
+        $cadena['reception_date_time'] = $dateFormat;
+        return $cadena;
+    }
+
+
 
     /**
      * Parsea la respuesta de una llamada GET
@@ -210,26 +245,9 @@ class ReolaService{
 
         $str = $response->getBody();
         $data = json_decode($str, true);
-
         return $data;
-
     }
 
-   /**
-    * Undocumented function
-    *
-    * @param String $idVariable
-    * @param String $dateStart
-    * @param String $dateEnd
-    * @return void
-    */
-    public function getDatosFiltrados($idVariable, $dateStart, $dateEnd){
-
-      $config = \Drupal::config('reolamaps.settings');
-      $mapContext = $this->getcontextMap($config);
-
-      return $mapContext;
-    }
 
     /**
      * Datos de configuración del mapa
@@ -256,6 +274,24 @@ class ReolaService{
 
       return $datos;
 
+    }
+
+    function validateOnline ($dateTime){
+
+      $online = 0;
+      date_default_timezone_set('UTC');
+      $separador = strpos($dateTime, 'T');
+      $date = substr($dateTime, 0, $separador);
+      $dateFormat = DrupalDateTime::createFromFormat('Y-m-d', $date);
+      $dateFormat = $dateFormat->format('Y-m-d');
+      $now = new DrupalDateTime('now');
+      $now = $now->format('Y-m-d');
+      if ($dateFormat !== $now){
+          $online = 0;
+      } else {
+          $online = 1;
+      }
+      return $online;
     }
 
 

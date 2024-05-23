@@ -10,44 +10,58 @@ use Drupal\Core\Controller\ControllerBase;
 final class ReolaController extends ControllerBase {
 
 
-public function showUltimodato($idBoya){
+
+/**
+ * showUltimoDato function
+ *
+ * Dato que se muestra tras pulsar en una boya concreta del mapa de showMap
+ *
+ * @param [type] $idBoya
+ * @return void
+ */
+public function showUltimodato($idBoya, $name){
 
     $reolaService = \Drupal::service('reola.service');
     $datos = $reolaService->getUltimoDato($idBoya);
+    $datos['name'] = $name;
 
-    return[
-        '#theme' => 'block_ultimodato',
-        '#titulo' => $this->t('Último dato'),
-        '#descripcion' => $this->t('Último dato'),
-        '#datos' => $datos
-    ];
+    if ((int)$idBoya>10){
+       return[
+            '#theme' => 'block_ultimodato',
+            '#titulo' => $this->t('Último dato'),
+            '#descripcion' => $this->t('Último dato'),
+            '#datos' => $datos
+        ];
+    } else {
+        return[
+            '#theme' => 'block_lastdatabig',
+            '#titulo' => $this->t('Último dato'),
+            '#descripcion' => $this->t('Último dato'),
+            '#datos' => $datos
+        ];
+    }
+
 }
 
+/**
+ * showMap function
+ *
+ * Mapa general con todas las boyas.
+ *
+ * @return void
+ */
 public function showMap(){
 
   $reolaService = \Drupal::service('reola.service');
-  $datos = $reolaService->getDatosMapa();
+  $data = $reolaService->getDatosMapa();
 
   return[
       '#theme' => 'block_map',
       '#titulo' => $this->t('Mapa temático'),
       '#descripcion' => $this->t('Mapa temático'),
-      '#datos' => $datos
+      '#datos' => $data
   ];
 }
 
-public function showFilteredForm(){
-
-    $reolaService = \Drupal::service('reola.service');
-    $datos = $reolaService->getDatosFiltrados('4723', '01-01-2024', '10-01-2024');
-   // ksm ($datos);
-    return[
-        '#theme' => 'filter_form',
-        '#titulo' => $this->t('Formulario filtros'),
-        '#descripcion' => $this->t('Formulario filtros'),
-        '#datos' => $datos
-
-    ];
-}
 
 }

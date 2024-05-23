@@ -6,16 +6,9 @@ reola:
   requirements:
     _permission: 'access content'
 reola.estacion:
-  path: '/reola/{idBoya}'
+  path: '/reola/{idBoya}/{name}'
   defaults:
     _title: 'Ultimo Dato'
     _controller: 'Drupal\reola\Controller\ReolaController::showUltimodato'
-  requirements:
-    _permission: 'access content'
-reola.filtros:
-  path: '/reola/formulario'
-  defaults:
-    _title: 'Formulario filtros'
-    _controller: 'Drupal\reola\Controller\ReolaController::showFilteredForm'
   requirements:
     _permission: 'access content'

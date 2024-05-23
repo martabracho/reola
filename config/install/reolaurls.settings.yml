@@ -1,0 +1,4 @@
+urlBoyasChicas: 'http://dockeric.agapa.es:9462/agenciaagrariaypesquera/pleamar/conectormarabierto/apiboyachica/proyecto/AgapaMancadiz/json2'
+urlBoyasGrandes: 'http://dockeric.agapa.es:9462/agenciaagrariaypesquera/pleamar/conectormarabierto/apiboyagrande/ultimoTrack'
+urlLastBoyasChicas: 'http://dockeric.agapa.es:9462/agenciaagrariaypesquera/pleamar/conectormarabierto/apiboyachica/proyecto/AgapaMancadiz/boyachica/'
+urlLastBoyasGrandes:  'http://dockeric.agapa.es:9462/agenciaagrariaypesquera/pleamar/conectormarabierto/apiboyagrande/boya/'
