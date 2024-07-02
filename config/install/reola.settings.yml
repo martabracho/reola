@@ -1,0 +1,38 @@
+extent:
+  xmin: -1792243.8021409153
+  ymin: 3879386.7850918537
+  xmax: 4472817.167754004
+  ymax: 18990863.47851347
+center:
+  x: -508883.42684124695
+  y: 4492019.701421972
+capas:
+  - capa1: "ign-base"
+    attributions: "CC-BY 4.0 <a href='https://www.ign.es'>Instituto Geográfico Nacional</a>"
+    title: "IGN Base"
+    nombre: "ign base"
+    url: "https://tms-ign-base.idee.es/1.0.0/IGNBaseTodo/{z}/{x}/{-y}.jpeg"
+    params: {'LAYERS': 'fondo'}
+  - capa2: "ign-ortofoto"
+    attributions: "CC-BY 4.0 <a href='https://www.ign.es'>Instituto Geográfico Nacional</a>"
+    title: "IGN Ortofoto"
+    nombre: "ign orto"
+    url: "https://www.ign.es/wms-inspire/pnoa-ma"
+    params: { 'LAYERS': 'fondo' }
+stations:
+  - station:
+      id: "2"
+      name: "Estación de Huelva"
+  - station:
+      id: "3"
+      name: "Estación de Almería"
+  - station:
+      id: "4"
+      name: "Estación de Cádiz"
+  - station:
+      id: "5"
+      name: "Estación de Granada"
+urlBoyasChicas: 'http://dockeric.agapa.es:9462/agenciaagrariaypesquera/pleamar/conectormarabierto/apiboyachica/proyecto/AgapaMancadiz/json2'
+urlBoyasGrandes: 'http://dockeric.agapa.es:9462/agenciaagrariaypesquera/pleamar/conectormarabierto/apiboyagrande/ultimoTrack'
+urlLastBoyasChicas: 'http://dockeric.agapa.es:9462/agenciaagrariaypesquera/pleamar/conectormarabierto/apiboyachica/proyecto/AgapaMancadiz/boyachica/'
+urlLastBoyasGrandes:  'http://dockeric.agapa.es:9462/agenciaagrariaypesquera/pleamar/conectormarabierto/apiboyagrande/boya/'

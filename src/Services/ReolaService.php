@@ -38,9 +38,10 @@ class ReolaService{
     public function getDatosMapa (){
 
 
-        $config = \Drupal::config('reolamaps.settings');
+        $config = \Drupal::config('reola.settings');
 
         $datos = $this->getContextMap($config);
+
 
         $res =[];
         $res = $this->getBoyasChicas();
@@ -107,11 +108,12 @@ class ReolaService{
 
         $cadena = "";
 
-        $config = \Drupal::config('reolaurls.settings');
+        $config = \Drupal::config('reola.settings');
 
         $data = ['string_con' => $config->get()];
 
         $url = $data["string_con"]["urlBoyasGrandes"];
+
 
         $client = new Client([
             // Base URI is used with relative requests
@@ -129,6 +131,25 @@ class ReolaService{
         }
 
 
+/*
+if (!filter_var($url, FILTER_VALIDATE_URL)) {
+    echo "Base URI Boyas Grandes inválida: " . $url;
+} else {
+    $client = new Client([
+        'base_uri' => $url,
+        'timeout'  => 20.0,
+        'verify' => false,
+    ]);
+
+    try {
+        $response = $client->request('GET', $url);
+        $cadena = $this->dataParser($response);
+    } catch (RequestException $e) {
+        Error::logException($logger, $e);
+    }
+}*/
+
+
         return $cadena;
 
     }
@@ -142,7 +163,7 @@ class ReolaService{
     private function getBoyasChicas(){
 
       $cadena = "";
-      $config = \Drupal::config('reolaurls.settings');
+      $config = \Drupal::config('reola.settings');
       $data = ['string_con' => $config->get()];
 
       $url = $data["string_con"]["urlBoyasChicas"];
@@ -164,6 +185,25 @@ class ReolaService{
         Error::logException($logger, $e);
       }
 
+/*
+if (!filter_var($url, FILTER_VALIDATE_URL)) {
+  echo "Base URI Boyas Chicas inválida: " . $url;
+} else {
+  $client = new Client([
+      'base_uri' => $url,
+      'timeout'  => 20.0,
+      'verify' => false,
+  ]);
+
+  try {
+      $response = $client->request('GET', $url);
+      $cadena = $this->dataParser($response);
+  } catch (RequestException $e) {
+      Error::logException($logger, $e);
+  }
+}*/
+
+
       return $cadena;
     }
 
@@ -176,7 +216,7 @@ class ReolaService{
      */
     public function getUltimoDato($idBoya){
         $cadena = "";
-        $config = \Drupal::config('reolaurls.settings');
+        $config = \Drupal::config('reola.settings');
 
         $data = ['string_con' => $config->get()];
 
@@ -215,10 +255,77 @@ class ReolaService{
         }
 
         $cadena = $this->dataParser($response);
+
         if ((int)$idBoya<10){
           $cadena = $this->dateFormat($cadena);
+          $cadena = $this->decimalFormatGrande($cadena);
+        } else{
+          $cadena = $this->decimalFormatChica($cadena);
         }
         return $cadena;
+    }
+
+    public function decimalFormatGrande($cadena){
+
+      $last = [];
+
+      foreach($cadena as $clave => $valor){
+        if (strcmp($clave, "data")==0){
+
+            foreach($valor as $clave1 => $valor1){
+              $separador = strpos($valor1['value'],'.');
+
+              array_shift($cadena[$clave]);
+              $last += [$valor1['variable']['name']. (' '). $valor1['calculation']['name'].' ('.$valor1['variable']['unit'].')' => substr($valor1['value'],0,$separador+4)];
+          }
+
+
+        }
+      }
+
+      $separador = strpos($cadena['latitude'], '.');
+      $cadena['latitude'] = substr($cadena['latitude'],0,$separador+7);
+      $separador = strpos($cadena['longitude'], '.');
+      $cadena['longitude'] = substr($cadena['longitude'],0,$separador+7);
+      $cadena['data'] = $last;
+      return $cadena;
+    }
+
+    public function decimalFormatChica($cadena){
+
+      $last = end($cadena['data']);
+      foreach($last as $clave => $valor){
+        //dpm ($clave, "Clave");
+        $separador = strpos($valor,'.');
+        switch ($clave){
+          case "hm0":
+            $last[$clave] = substr($last[$clave],0, $separador + 4);
+            break;
+          case "hmax":
+            $last[$clave] = substr($last[$clave],0, $separador + 4);
+            break;
+          case "hsw":
+            $last[$clave] = substr($last[$clave],0, $separador + 4);
+            break;
+          case "tstr":
+            $last[$clave] = $last[$clave];
+            break;
+          case "lat":
+            $last[$clave] = substr($last[$clave],0, $separador + 7);
+            break;
+          case "lon":
+            $last[$clave] = substr($last[$clave],0, $separador + 7);
+            break;
+          default:
+          $last[$clave] = substr($last[$clave],0, $separador + 3);
+        }
+
+
+      }
+
+      $claveUltimoElemento = key($cadena["data"]);
+      $cadena["data"][$claveUltimoElemento] = $last;
+      return $cadena;
     }
 
     public function dateFormat ($cadena){
@@ -269,8 +376,9 @@ class ReolaService{
                         $config->get('center.x'),
                         $config->get('center.y')
                       ],
-         "layers" => $config->get('layers')
+         "capas" => $config->get('capas')
       ];
+
 
       return $datos;
 

@@ -4,6 +4,7 @@
 <h2 id="titulo"></h2>
 
 <script src="//ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js"></script>
+<style src="/themes/custom/child/css/pages/mar_adentro.css"></style>
 
 <script type="text/javascript">
     var url = window.location.href;
@@ -12,6 +13,8 @@
     nameBoyaRecibido = nameBoyaRecibido.replace("%C3%A1","á");
     nameBoyaRecibido = nameBoyaRecibido.replace("%C3%A9","é");
     nameBoyaRecibido = nameBoyaRecibido.replace("%C3%AD","í");
+    nameBoyaRecibido = nameBoyaRecibido.replace("%C3%B3","ó");
+    nameBoyaRecibido = nameBoyaRecibido.replace("%C3%BA","ú");
     nameBoyaRecibido = nameBoyaRecibido.replace("%C3%B1","ñ");
     for (var i = 0; i < nameBoyaRecibido.length; i++){
       nameBoyaRecibido = nameBoyaRecibido.replace("%20"," ");
@@ -38,18 +41,13 @@
         text-align: right;
         padding: 10px;
     }
-    .datosizq{
-      width: 50%;
-      float: left;
-      margin-bottom: 3%;
-    }
-
-    .tab{
+        .tab{
       overflow: hidden;
       border: 1px solid #ccc;
       background-color: #f7f7f7;
       width: 100%;
       margin-bottom: 3%;
+      margin-top: 3%;
     }
     .tab button.active {
       background-color: #0E9BA6;
@@ -68,11 +66,33 @@
       font-size: 17px;
     }
 
+    .concabecera{
+      width: 100%;
+    }
+
+    .imagenBoya{
+      float: right;
+    }
+
+  .bttVolver{
+    border-radius: 10px;
+    font-weight: bold;
+    padding: 14px;
+    font-size:15px;
+    text-align: center;
+    cursor: default;
+  }
+
+  .bttVolver:hover{
+    cursor: pointer;
+  }
+
+
 </style>
 
 {% if datos.data|last.tstr!="" %}
-<div class="datosizq">
-  <table id="concabecera">
+<div class="datosizq"  >
+  <table id="concabecera" class="concabecera">
     <tbody>
       <tr>
         <td>
@@ -87,10 +107,19 @@
             {{ datos.data|last.lon }}
           </p>
         </td>
+        <td class="imagenBoya">
+
+          <img src="{{ path('<front>') }}{{directory}}/images/BoyaChica.jpg" >
+
+      </td>
       </tr>
+
     </tbody>
   </table>
 </div>
+
+
+<div style="clear: both;"></div>
 
 <div class="tab">
   <button class="tablinks" onclick="openDatos(event, 'datosdiarios')" id="defaultOpen">Último Dato Registrado</button>
@@ -121,6 +150,13 @@
   </thead>
   <tbody>
     <tr>
+      {% block javascript %}
+      <script>
+        let sst = {{ datos.data|last.sst }}
+        console.log(sst)
+      </script>
+      {% endblock %}
+
       <td>{{ datos.data|last.sst }}</td>
       <td>{{ datos.data|last.hm0 }}</td>
       <td>{{ datos.data|last.hmax }}</td>
@@ -145,11 +181,21 @@
 
 <div id="datosacumulados" class = "tabcontent"></div>
 
+<br/>
+ <div id="volver" class="bttVolver">
+    <button onClick="window.history.back()" id="volver" class="form-submit bttVolver">Volver al mapa</button>
+ </div>
+
+
+
 <script type="text/javascript">
 
      window.addEventListener('load', function() {
     // Ejecución después de que el DOM de la página se haya cargado completamente
-      document.getElementById("block-child-webform").style.display = "none";
+      var form = document.getElementById("block-child-webform");
+      form.style.display = "none";
+      form.parentNode.insertBefore(volver, form.nextSibiling);
+
        //Rellenar el campo IdBoya con el dato de la url
       var url = window.location.href;
       var testigo = "reola";
@@ -159,10 +205,12 @@
       document.getElementById("edit-idboya").value = idBoya;
 
     });
+
 		function openDatos(evt, datosName) {
 			  var i, tabcontent, tablinks;
-			  tabcontent = document.getElementsByClassName("tabcontent");
-			  for (i = 0; i < tabcontent.length; i++) {
+        tabcontent = document.getElementsByClassName("tabcontent");
+
+        for (i = 0; i < tabcontent.length; i++) {
 				  tabcontent[i].style.display = "none";
 			  }
 			  tablinks = document.getElementsByClassName("tablinks");
@@ -176,6 +224,7 @@
           $("#block-child-webform").hide();
           $("#webform-submission-export-data-add-form").hide();
           $("#datosdiarios").show();
+
         }
 
         if (datosName=='datosacumulados'){
@@ -195,6 +244,8 @@
 
 
 {% endif %}
+
+
 
 {% if datos.data|last.tstr=="" %}
 

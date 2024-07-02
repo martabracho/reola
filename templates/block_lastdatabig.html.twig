@@ -13,8 +13,10 @@
     var nameBoyaRecibido = url.slice(posicion+1);
 
     nameBoyaRecibido = nameBoyaRecibido.replace("%C3%A1","á");
+    nameBoyaRecibido = nameBoyaRecibido.replace("%C3%A9","é");
     nameBoyaRecibido = nameBoyaRecibido.replace("%C3%AD","í");
     nameBoyaRecibido = nameBoyaRecibido.replace("%C3%B3","ó");
+    nameBoyaRecibido = nameBoyaRecibido.replace("%C3%BA","ú");
     nameBoyaRecibido = nameBoyaRecibido.replace("%C3%B1","ñ");
 
     for (var i = 0; i < nameBoyaRecibido.length; i++){
@@ -42,11 +44,7 @@
         padding: 10px;
     }
 
-    .datosizq{
-      width: 50%;
-      float: left;
-      margin-bottom: 3%;
-    }
+
 
     .tab{
       overflow: hidden;
@@ -54,6 +52,7 @@
       background-color: #f7f7f7;
       width: 100%;
       margin-bottom: 3%;
+      margin-top: 3%;
     }
     .tab button.active {
       background-color: #0E9BA6;
@@ -72,10 +71,31 @@
       font-size: 17px;
     }
 
+     .concabecera{
+      width: 100%;
+    }
+
+    .imagenBoya{
+      float: right;
+    }
+    .bttVolver{
+    border-radius: 10px;
+    font-weight: bold;
+    padding: 14px;
+    font-size:15px;
+    text-align: center;
+    cursor: default;
+  }
+
+  .bttVolver:hover{
+    cursor: pointer;
+  }
+
+
 </style>
 
 <div class="datosizq">
-  <table id="concabecera">
+  <table id="concabecera" class="concabecera">
     <tbody>
       <tr>
         <td>
@@ -90,6 +110,11 @@
             {{ datos.longitude }}
           </p>
         </td>
+        <td class="imagenBoya">
+
+          <img src="{{ path('<front>') }}{{directory}}/images/BoyaGrande.jpg" >
+
+      </td>
       </tr>
     </tbody>
   </table>
@@ -105,16 +130,16 @@
 <table class="scroll-table">
   <thead>
     <tr>
-      {% for clave, valor in datos.data%}
-        <th>{{ valor.variable.name }}</th>
+      {% for clave,valor in datos.data %}
+        <th>{{ clave }}</th>
       {% endfor %}
 
     </tr>
   </thead>
   <tbody>
     <tr>
-      {% for clave, valor in datos.data%}
-        <td>{{ valor.value }}</td>
+      {% for clave,valor in datos.data %}
+        <td>{{ valor }}</td>
       {% endfor %}
 
     </tr>
@@ -122,13 +147,20 @@
   </tbody>
 </table>
 </div>
+<br/>
+<div id="volver" class="bttVolver">
+  <button onClick="window.history.back()" id="volver" class="form-submit bttVolver">Volver al mapa</button>
+</div>
 
 <div id="datosacumulados" class = "tabcontent"></div>
 
 <script type="text/javascript">
     window.addEventListener('load', function() {
         // Ejecución después de que el DOM de la página se haya cargado completamente
-        document.getElementById("block-child-webform").style.display = "none";
+        var form = document.getElementById("block-child-webform");
+        form.style.display = "none";
+         form.parentNode.insertBefore(volver, form.nextSibiling);
+
         //Rellenar el campo IdBoya con el dato de la url
         var url = window.location.href;
         var testigo = "reola";

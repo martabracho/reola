@@ -1,0 +1,20 @@
+<?php
+
+/**
+ * @file
+ * Instala, actualiza y desinstala funciones para el módulo reola.
+ */
+
+
+
+/**
+ * Implementa hook_uninstall().
+ */
+function reola_uninstall() {
+  // Código que se ejecuta durante la desinstalación del módulo.
+  $config_files = ['reola.settings'];
+  foreach ($config_files as $config_file) {
+    Drupal::configFactory()->getEditable($config_file)->delete();
+  }
+
+}
